@@ -1,108 +1,112 @@
-﻿//
-#include <math.h>
-#include <stdlib.h>
-#if defined(_WIN32)
+﻿#if defined(_WIN32)
 #  define _USE_MATH_DEFINES
 #  define _CRT_SECURE_NO_WARNINGS
-#  pragma warning(disable: 4996)
 #  include <GL/glew.h>
 #  include <GL/glut.h>
-#  include <GL/glext.h>
-#elif defined(__APPLE__) || defined(MACOSX)
+#elif defined(__APPLE__)
 #  define GL_SILENCE_DEPRECATION
 #  include <GLUT/glut.h>
 #else
 #  define GL_GLEXT_PROTOTYPES
 #  include <GL/glut.h>
 #endif
-
-/* 頂点バッファオブジェクトのメモリを参照するポインタのデータ型 */
-typedef GLfloat Position[3];
-typedef GLuint Edge[2];
-typedef GLuint Face[3];
+#include <math.h>
+#include <stdlib.h>
 
 /*
 ** 立方体を線で描く
 */
-GLuint wireCube(const GLuint *buffer)
+GLuint wireCube(const GLuint* buffer)
 {
+  /* 頂点のデータ型 */
+  typedef GLfloat Position[3];
+
   /* 頂点バッファオブジェクトに８頂点分のメモリ領域を確保する */
   glBindBuffer(GL_ARRAY_BUFFER, buffer[0]);
-  glBufferData(GL_ARRAY_BUFFER, sizeof (Position) * 8, NULL, GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(Position) * 8, NULL, GL_STATIC_DRAW);
 
   /* 頂点バッファオブジェクトのメモリをプログラムのメモリ空間にマップする */
-  Position *position = (Position *)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+  Position* position = (Position*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
 
   /* 頂点バッファオブジェクトのメモリにデータを書き込む */
   position[0][0] = -1.0f;
   position[0][1] = -1.0f;
   position[0][2] = -1.0f;
 
-  position[1][0] =  1.0f;
+  position[1][0] = 1.0f;
   position[1][1] = -1.0f;
   position[1][2] = -1.0f;
 
-  position[2][0] =  1.0f;
+  position[2][0] = 1.0f;
   position[2][1] = -1.0f;
-  position[2][2] =  1.0f;
+  position[2][2] = 1.0f;
 
   position[3][0] = -1.0f;
   position[3][1] = -1.0f;
-  position[3][2] =  1.0f;
+  position[3][2] = 1.0f;
 
   position[4][0] = -1.0f;
-  position[4][1] =  1.0f;
+  position[4][1] = 1.0f;
   position[4][2] = -1.0f;
 
-  position[5][0] =  1.0f;
-  position[5][1] =  1.0f;
+  position[5][0] = 1.0f;
+  position[5][1] = 1.0f;
   position[5][2] = -1.0f;
 
-  position[6][0] =  1.0f;
-  position[6][1] =  1.0f;
-  position[6][2] =  1.0f;
+  position[6][0] = 1.0f;
+  position[6][1] = 1.0f;
+  position[6][2] = 1.0f;
 
   position[7][0] = -1.0f;
-  position[7][1] =  1.0f;
-  position[7][2] =  1.0f;
+  position[7][1] = 1.0f;
+  position[7][2] = 1.0f;
+
+  /* 頂点バッファオブジェクトのメモリをプログラムのメモリ空間から切り離す */
+  glUnmapBuffer(GL_ARRAY_BUFFER);
+
+  /* 頂点バッファオブジェクトを解放する */
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+  /* 稜線のデータ型 */
+  typedef GLuint Edge[2];
 
   /* 頂点バッファオブジェクトに１２稜線分のメモリ領域を確保する */
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer[1]);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof (Edge) * 12, NULL, GL_STATIC_DRAW);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Edge) * 12, NULL, GL_STATIC_DRAW);
 
   /* 頂点バッファオブジェクトのメモリをプログラムのメモリ空間にマップする */
-  Edge *edge = (Edge *)glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
+  Edge* edge = (Edge*)glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
 
   /* 頂点バッファオブジェクトのメモリにデータを書き込む */
-  edge[ 0][0] = 0;
-  edge[ 0][1] = 1;
+  edge[0][0] = 0;
+  edge[0][1] = 1;
 
-  edge[ 1][0] = 1;
-  edge[ 1][1] = 2;
+  edge[1][0] = 1;
+  edge[1][1] = 2;
 
-  edge[ 2][0] = 2;
-  edge[ 2][1] = 3;
+  edge[2][0] = 2;
+  edge[2][1] = 3;
 
-  edge[ 3][0] = 3;
-  edge[ 3][1] = 0;
+  edge[3][0] = 3;
+  edge[3][1] = 0;
 
-  edge[ 4][0] = 0;
-  edge[ 4][1] = 4;
+  edge[4][0] = 0;
+  edge[4][1] = 4;
 
-  edge[ 5][0] = 1;
-  edge[ 5][1] = 5;
+  edge[5][0] = 1;
+  edge[5][1] = 5;
 
-  edge[ 6][0] = 2;
-  edge[ 6][1] = 6;
+  edge[6][0] = 2;
+  edge[6][1] = 6;
 
-  edge[ 7][0] = 3;
-  edge[ 7][1] = 7;
+  edge[7][0] = 3;
+  edge[7][1] = 7;
 
-  edge[ 8][0] = 4;
-  edge[ 8][1] = 5;
+  edge[8][0] = 4;
+  edge[8][1] = 5;
 
-  edge[ 9][0] = 5;
-  edge[ 9][1] = 6;
+  edge[9][0] = 5;
+  edge[9][1] = 6;
 
   edge[10][0] = 6;
   edge[10][1] = 7;
@@ -116,39 +120,31 @@ GLuint wireCube(const GLuint *buffer)
   /* 頂点バッファオブジェクトを解放する */
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-  /* 頂点バッファオブジェクトのメモリをプログラムのメモリ空間から切り離す */
-  glUnmapBuffer(GL_ARRAY_BUFFER);
-
-  /* 頂点バッファオブジェクトを解放する */
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-
   return 24;
 }
 
 /*
 ** 球を線で描く
 */
-GLuint wireSphere(int slices, int stacks, const GLuint *buffer)
+GLuint wireSphere(int slices, int stacks, const GLuint* buffer)
 {
+  /* 頂点の数 */
   GLuint vertices = slices * stacks - slices + 2;
-  GLuint edges = slices * stacks * 2 - slices;
 
-  /* 頂点バッファオブジェクトを有効にする */
-  glBindBuffer(GL_ARRAY_BUFFER, buffer[0]);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer[1]);
+  /* 頂点のデータ型 */
+  typedef GLfloat Position[3];
 
   /* 頂点バッファオブジェクトにメモリ領域を確保する */
-  glBufferData(GL_ARRAY_BUFFER, sizeof (Position) * vertices, NULL, GL_STATIC_DRAW);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof (Edge) * edges, NULL, GL_STATIC_DRAW);
+  glBindBuffer(GL_ARRAY_BUFFER, buffer[0]);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(Position) * vertices, NULL, GL_STATIC_DRAW);
 
   /* 頂点バッファオブジェクトのメモリをプログラムのメモリ空間にマップする */
-  Position *position = (Position *)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-  Edge *edge = (Edge *)glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
+  Position* position = (Position*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
 
   /* 北極点の位置 */
-  (*position)[0] =  0.0f;
-  (*position)[1] =  1.0f;
-  (*position)[2] =  0.0f;
+  (*position)[0] = 0.0f;
+  (*position)[1] = 1.0f;
+  (*position)[2] = 0.0f;
   ++position;
 
   /* 中間部分の頂点の位置 */
@@ -170,11 +166,28 @@ GLuint wireSphere(int slices, int stacks, const GLuint *buffer)
   }
 
   /* 南極点の位置 */
-  (*position)[0] =  0.0f;
+  (*position)[0] = 0.0f;
   (*position)[1] = -1.0f;
-  (*position)[2] =  0.0f;
+  (*position)[2] = 0.0f;
 
-  int count = 1;
+  /* 頂点バッファオブジェクトのメモリをプログラムのメモリ空間から切り離す */
+  glUnmapBuffer(GL_ARRAY_BUFFER);
+
+  /* 頂点バッファオブジェクトを解放する */
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+  /* 稜線の数 */
+  GLuint edges = slices * stacks * 2 - slices;
+
+  /* 稜線のデータ型 */
+  typedef GLuint Edge[2];
+
+  /* 稜線の頂点バッファオブジェクトにメモリ領域を確保する */
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer[1]);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Edge) * edges, NULL, GL_STATIC_DRAW);
+
+  /* 稜線の頂点バッファオブジェクトのメモリをプログラムのメモリ空間にマップする */
+  Edge* edge = (Edge*)glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
 
   /* 北極点周りの稜線 */
   for (int i = 1; i <= slices; ++i) {
@@ -184,6 +197,7 @@ GLuint wireSphere(int slices, int stacks, const GLuint *buffer)
   }
 
   /* 中間部分の稜線 */
+  int count = 1;
   for (int j = 2; j < stacks; ++j) {
     for (int i = 1; i < slices; ++i) {
 
@@ -238,13 +252,11 @@ GLuint wireSphere(int slices, int stacks, const GLuint *buffer)
   (*edge)[0] = count;
   (*edge)[1] = vertices - 1;
 
-  /* 頂点バッファオブジェクトのメモリをプログラムのメモリ空間から切り離す */
+  /* 稜線の頂点バッファオブジェクトのメモリをプログラムのメモリ空間から切り離す */
   glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
-  glUnmapBuffer(GL_ARRAY_BUFFER);
 
-  /* 頂点バッファオブジェクトを解放する */
+  /* 稜線の頂点バッファオブジェクトを解放する */
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
 
   return edges * 2;
 }
@@ -252,22 +264,20 @@ GLuint wireSphere(int slices, int stacks, const GLuint *buffer)
 /*
 ** 球を三角形で描く
 */
-GLuint solidSphere(int slices, int stacks, const GLuint *buffer)
+GLuint solidSphere(int slices, int stacks, const GLuint* buffer)
 {
+  /* 頂点の数 */
   GLuint vertices = (slices + 1) * (stacks + 1);
-  GLuint faces = slices * stacks * 2;
 
-  /* 頂点バッファオブジェクトを有効にする */
-  glBindBuffer(GL_ARRAY_BUFFER, buffer[0]);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer[1]);
+  /* 頂点のデータ型 */
+  typedef GLfloat Position[3];
 
   /* 頂点バッファオブジェクトにメモリ領域を確保する */
-  glBufferData(GL_ARRAY_BUFFER, sizeof (Position) * vertices, NULL, GL_STATIC_DRAW);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof (Face) * faces, NULL, GL_STATIC_DRAW);
+  glBindBuffer(GL_ARRAY_BUFFER, buffer[0]);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(Position) * vertices, NULL, GL_STATIC_DRAW);
 
   /* 頂点バッファオブジェクトのメモリをプログラムのメモリ空間にマップする */
-  Position *position = (Position *)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-  Face *face = (Face *)glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
+  Position* position = (Position*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
 
   /* 頂点の位置 */
   for (int j = 0; j <= stacks; ++j) {
@@ -286,6 +296,25 @@ GLuint solidSphere(int slices, int stacks, const GLuint *buffer)
       ++position;
     }
   }
+
+  /* 頂点バッファオブジェクトのメモリをプログラムのメモリ空間から切り離す */
+  glUnmapBuffer(GL_ARRAY_BUFFER);
+
+  /* 頂点バッファオブジェクトを解放する */
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+  /* 面の数 */
+  GLuint faces = slices * stacks * 2;
+
+  /* 面のデータ型 */
+  typedef GLuint Face[3];
+
+  /* 頂点バッファオブジェクトにメモリ領域を確保する */
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer[1]);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Face) * faces, NULL, GL_STATIC_DRAW);
+
+  /* 頂点バッファオブジェクトのメモリをプログラムのメモリ空間にマップする */
+  Face* face = (Face*)glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
 
   /* 面の指標 */
   for (int j = 0; j < stacks; ++j) {
@@ -308,11 +337,9 @@ GLuint solidSphere(int slices, int stacks, const GLuint *buffer)
 
   /* 頂点バッファオブジェクトのメモリをプログラムのメモリ空間から切り離す */
   glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
-  glUnmapBuffer(GL_ARRAY_BUFFER);
 
   /* 頂点バッファオブジェクトを解放する */
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
 
   return faces * 3;
 }
