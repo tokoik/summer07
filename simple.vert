@@ -1,7 +1,7 @@
 #version 120
-//
+
 // simple.vert
-//
+
 invariant gl_Position;
 attribute vec3 position;
 uniform mat4 projectionMatrix;

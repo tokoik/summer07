@@ -21,10 +21,8 @@ extern void printShaderInfoLog(GLuint shader);
 extern void printProgramInfoLog(GLuint program);
 
 /*
-** シェーダプログラム
+** プログラムオブジェクト
 */
-static GLuint vertShader;
-static GLuint fragShader;
 static GLuint gl2Program;
 
 /*
@@ -99,19 +97,19 @@ static void display(void)
   /* 隠面消去処理を有効にする */
   glEnable(GL_DEPTH_TEST);
 
-  /* シェーダプログラムを適用する */
+  /* プログラムオブジェクトを適用する */
   glUseProgram(gl2Program);
 
   /* 投影変換行列の uniform 変数 projectionMatrix に変換行列の値を設定する */
   glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, projectionMatrix);
 
-  /* index が 0 の attribute 変数に頂点情報を対応付ける */
-  glEnableVertexAttribArray(0);
-
   /* 頂点バッファオブジェクトとして buffer[0] を指定する */
   glBindBuffer(GL_ARRAY_BUFFER, buffer[0]);
 
-  /* 頂点情報の格納場所と書式を指定する */
+  /* index が 0 の attribute 変数を有効にする */
+  glEnableVertexAttribArray(0);
+
+  /* index が 0 の attribute 変数に頂点バッファオブジェクトの場所と書式を設定する */
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
   /* 頂点バッファオブジェクトの指標として buffer[1] を指定する */
@@ -120,12 +118,15 @@ static void display(void)
   /* 図形を描く */
   glDrawElements(GL_TRIANGLES, points, GL_UNSIGNED_INT, 0);
 
+  /* index が 0 の attribute 変数を無効にする */
+  glDisableVertexAttribArray(0);
+
   /* 頂点バッファオブジェクトを解放する */
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-  /* index が 0 の attribute 変数の頂点情報との対応付けを解除する */
-  glDisableVertexAttribArray(0);
+  /* 固定機能に戻す*/
+  glUseProgram(0);
 
   /* 隠面消去処理を無効にする */
   glDisable(GL_DEPTH_TEST);
@@ -138,9 +139,6 @@ static void display(void)
 */
 static void init(void)
 {
-  /* シェーダプログラムのコンパイル／リンク結果を得る変数 */
-  GLint compiled, linked;
-
 #if defined(_WIN32)
   /* GLEW の初期化 */
   GLenum err = glewInit();
@@ -154,12 +152,15 @@ static void init(void)
   glClearColor(1.0, 1.0, 1.0, 1.0);
 
   /* シェーダオブジェクトの作成 */
-  vertShader = glCreateShader(GL_VERTEX_SHADER);
-  fragShader = glCreateShader(GL_FRAGMENT_SHADER);
+  GLuint vertShader = glCreateShader(GL_VERTEX_SHADER);
+  GLuint fragShader = glCreateShader(GL_FRAGMENT_SHADER);
 
   /* シェーダのソースプログラムの読み込み */
   if (readShaderSource(vertShader, "simple.vert")) exit(1);
   if (readShaderSource(fragShader, "simple.frag")) exit(1);
+
+  /* シェーダオブジェクトのコンパイル結果を得る変数 */
+  GLint compiled;
 
   /* バーテックスシェーダのソースプログラムのコンパイル */
   glCompileShader(vertShader);
@@ -182,7 +183,7 @@ static void init(void)
   /* プログラムオブジェクトの作成 */
   gl2Program = glCreateProgram();
 
-  /* シェーダオブジェクトの登録 */
+  /* プログラムオブジェクトにシェーダオブジェクトをの登録する */
   glAttachShader(gl2Program, vertShader);
   glAttachShader(gl2Program, fragShader);
 
@@ -190,7 +191,13 @@ static void init(void)
   glDeleteShader(vertShader);
   glDeleteShader(fragShader);
 
-  /* シェーダプログラムのリンク */
+  /* attribute 変数 position の index を 0 に指定する */
+  glBindAttribLocation(gl2Program, 0, "position");
+
+  /* プログラムオブジェクトのリンク結果を得る変数 */
+  GLint linked;
+
+  /* プログラムオブジェクトのリンク */
   glLinkProgram(gl2Program);
   glGetProgramiv(gl2Program, GL_LINK_STATUS, &linked);
   printProgramInfoLog(gl2Program);
